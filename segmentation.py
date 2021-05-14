@@ -1,13 +1,52 @@
-
 import os
 import cv2
 import numpy as np
 from PIL import Image
 from tqdm import tqdm
 
+import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
+
+from tensorflow.keras.models import load_model   
+
 class segmentation():
     
     def __init__(self, Path, Parameters, model):
+        """
+        Class for multilevel semantic segmentation with a pretrained unet.
+        Provided grayscale images are resized to a uniform size during
+        segmentation and results are restored to their original size via
+        linear upsampling afterwards. Segmentation results are of shape
+        (x_dim, y_dim, n), where n is the number of levels distinguished
+        by the segmentation. Each pixel givel carries information on the 
+        probability of belonging to any of the n levels.
+        Intended for iterating over a directory
+        of grayscale images. Upon instantiation, a folder for the output data
+        is generated in the parent directory to the input path.
+        
+
+        Parameters
+        ----------
+        Path : string
+            Directory containing input data.
+        Parameters : dict
+            dictionary of segmentation parameters. Possible parameters are
+        'first_frame' : int
+            number of first frame
+        'last_frame' : int
+            number of last frame
+        'increment' : int
+            process only every ith frame
+        'size' : (int, int)
+            uniform size images are resized to during segmentation
+        model : tensorflow/keras model
+            pretrained unet model
+
+        Returns
+        -------
+        None.
+
+        """
         
         self.Path = Path
         self.Path_Output = Path + '_Probability'
@@ -32,7 +71,22 @@ class segmentation():
         self.Frames = Frames[self.Parameters['first_frame']:self.Parameters['last_frame']:self.Parameters['increment']]
                 
 
-    def imread(self,Frame):
+    def imread(self, Frame):
+        """
+        Function for reading and equalizing gray-scale images.
+
+        Parameters
+        ----------
+        Frame : string
+            name of the current image file
+
+        Returns
+        -------
+        I : numpy array
+            equalized image
+
+        """
+        
         Path = os.path.join(self.Path, Frame)
         
         I = cv2.imread(Path, cv2.IMREAD_GRAYSCALE)
@@ -47,15 +101,24 @@ class segmentation():
         return I
 
 
-    def segment_frame(self,Frame):
-        
-        # plt.figure() 
-        
+    def segment_frame(self, Frame):
+        """
+        Function to segment a single gray-scale image.
+
+        Parameters
+        ----------
+        Frame : string
+            name of the current image file
+
+        Returns
+        -------
+        R : numpy array
+            segmented image
+
+        """
 
         I = self.imread(Frame)
 
-            # O = I.copy()
-            
         size0 = I.shape
         
         i = np.argmin(size0)
@@ -74,21 +137,63 @@ class segmentation():
             R = R[int(d/2):-(int(d/2)), :, :]
         if i == 1:
             R = R[:, int(d/2):-(int(d/2)), :]
-                
-            
-                
-            # plt.clf()
-            # plt.imshow(O, cmap='gray')
-            # plt.imshow(R, alpha=0.25)
-            # plt.axis('off')
-            # plt.savefig(os.path.join(self.Path_Output,Frame.split('.')[0]+'.png'), dpi=300)
-            # plt.pause(0.01)
-            # plt.draw()
-        
-        
+
         return R
+    
+    
+    def segment_and_show(self, Frame):
+        """
+        Function to segment a single image & display an overlay of the original
+        data and the segmentation result
+
+        Parameters
+        ----------
+        Frame : string
+            name of the current image file
+
+        Returns
+        -------
+        fig : handle
+            handle to the figure
+
+        """
+        
+        I = self.imread(Frame)
+        R = self.segment_frame(Frame)
+        
+        
+        fig = plt.figure(figsize=plt.figaspect(1/3)) 
+        
+        gs = gridspec.GridSpec(1, 3)
+        
+        plt.subplot(gs[0, 0])
+        plt.imshow(I, cmap='gray')
+        plt.axis('off')
+        
+        plt.subplot(gs[0, 1])
+        plt.imshow(I, cmap='gray')
+        plt.imshow(R, alpha=0.25)
+        plt.axis('off')
+        
+        plt.subplot(gs[0, 2])
+        plt.imshow(I, cmap='gray')
+        plt.imshow(R)
+        plt.axis('off')
+        
+        plt.tight_layout()
+        
+        return fig
+    
 
     def run(self):
+        """
+        Function to run segmentation over a set of images.
+
+        Returns
+        -------
+        None.
+
+        """
         
         for Frame in tqdm(self.Frames):
 
@@ -96,17 +201,29 @@ class segmentation():
     
             Img = Image.fromarray(np.uint8(p*255))
             Img.save(os.path.join(self.Path_Output,Frame.split('.')[0]+'.png'))
+    
  
-from tensorflow.keras.models import load_model           
-model = load_model(os.path.join('C:/Users/Adrian/Desktop/SlimeNet','model512_depth5_epoch15.h5'))
-    
+if __name__ == '__main__':
 
-Path = 'C:/Users/Adrian/Desktop/Crop2'
+    # paths
+    Path_Data = 'E:\Seadrive\Adrian F\Meine Bibliotheken\Phasenwellen-Projekt\codes_unsorted\SlimeNet\images'
+    Path_Model = os.path.join('C:/Users/Adrian/Desktop', 'model512_depth5_epoch4.h5')
 
-Parameters = {'first_frame':None,\
-              'last_frame':None,\
-              'size':(512, 512)
-                }
+    # load pretrained model
+    model = load_model(Path_Model)
+
+    # specify segmentation parameters
+    Parameters = {'first_frame':None,\
+                  'last_frame':None,\
+                  'increment':None,\
+                  'size':(256, 256)
+                    }
+        
+    # instantiate segmentation object
+    obj = segmentation(Path_Data, Parameters, model)
     
-obj = segmentation(Path, Parameters, model)
-obj.run()
+    # run segmentation
+    # obj.run()
+    
+    # show random examples
+    fig = obj.segment_and_show(os.path.join(obj.Path, np.random.choice(obj.Frames)))
