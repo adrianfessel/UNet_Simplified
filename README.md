@@ -15,13 +15,13 @@
 	adaptation of the preprocessing steps taken in the training / segmentation functions,
 	and possibly different data augmentation steps.
 	
-	![alt text](https://github.com/adrianfessel/UNet_Simplified/blob/main/overlay.png?raw=true)
+![alt text](https://github.com/adrianfessel/UNet_Simplified/blob/main/overlay.png?raw=true)
 	
 # Requirements
 	The implementation is based on tensorflow/keras and as any cnn model, works best if executed
 	on a gpu. Other packages required include os, numpy, matplotlib, opencv, PIL, sklearn and tqdm.
 	
-# specifications for training data
+# Specifications for training data
 	images : any generic grayscale image specification should work (color images will be converted 
 		to grayscale during image reading)
 	labels : grayscale or color image, where each discrete gray- or color value corresponds to one class
