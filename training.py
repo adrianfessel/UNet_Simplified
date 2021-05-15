@@ -42,8 +42,9 @@ def maskread(file, binning=None):
 
         M = cv2.resize(M, size, interpolation=cv2.INTER_NEAREST)
 
-    Mv = list(set(M.flatten()))
-    Mc = np.zeros((M.shape[0], M.shape[1], 3), dtype=np.float32)
+
+    Mv = list(np.unique(M))
+    Mc = np.zeros((M.shape[0], M.shape[1], len(Mv)), dtype=np.float32)
 
     for i, v in enumerate(Mv):
         Mc[M[:, :] == v, i] = 1
