@@ -142,11 +142,11 @@ if __name__ == '__main__':
     depth = 4
     batch_size = 2
     size = (256, 256)
-    epochs = 2
+    epochs = 5
     
     # Paths
     Path_Data = 'E:\Seadrive\Adrian F\Meine Bibliotheken\Phasenwellen-Projekt\codes_unsorted\SlimeNet'
-    Path_Model = os.path.join('C:/Users/Adrian/Desktop', 'model512_depth5_epoch4.h5')
+    Path_Model = os.path.join('C:/Users/Adrian/Desktop', 'model{}_depth{}_epoch{}.h5',format(size[0], depth, epochs))
     
     # training data
     images = [File for File in os.listdir(os.path.join(

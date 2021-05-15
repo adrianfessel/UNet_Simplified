@@ -207,7 +207,7 @@ if __name__ == '__main__':
 
     # paths
     Path_Data = 'E:\Seadrive\Adrian F\Meine Bibliotheken\Phasenwellen-Projekt\codes_unsorted\SlimeNet\images'
-    Path_Model = os.path.join('C:/Users/Adrian/Desktop', 'model512_depth5_epoch4.h5')
+    Path_Model = os.path.join('C:/Users/Adrian/Desktop', 'model512_depth4_epoch5.h5')
 
     # load pretrained model
     model = load_model(Path_Model)
@@ -226,4 +226,5 @@ if __name__ == '__main__':
     # obj.run()
     
     # show random examples
-    fig = obj.segment_and_show(os.path.join(obj.Path, np.random.choice(obj.Frames)))
+    frame = os.path.join(obj.Path, np.random.choice(obj.Frames))
+    fig = obj.segment_and_show(frame)
