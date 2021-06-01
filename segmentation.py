@@ -201,13 +201,31 @@ class segmentation():
     
             Img = Image.fromarray(np.uint8(p*255))
             Img.save(os.path.join(self.Path_Output,Frame.split('.')[0]+'.png'))
+            
+            
+    def run_overlay(self):
     
- 
+        plt.figure()    
+    
+        for Frame in tqdm(self.Frames):
+    
+            plt.clf()        
+    
+            I = self.imread(Frame)
+            R = self.segment_frame(Frame)
+            
+            R[:,:,1] = 0
+            
+            plt.imshow(I, cmap='gray')
+            plt.imshow(R, alpha=0.25)
+            plt.axis('off')
+
 if __name__ == '__main__':
 
     # paths
-    Path_Data = 'E:\Seadrive\Adrian F\Meine Bibliotheken\Phasenwellen-Projekt\codes_unsorted\SlimeNet\images'
-    Path_Model = os.path.join('C:/Users/Adrian/Desktop', 'model512_depth4_epoch5.h5')
+    # Path_Data = 'E:\Seadrive\Adrian F\Meine Bibliotheken\Phasenwellen-Projekt\codes_unsorted\SlimeNet\images'
+    Path_Data = 'E:/Movies_arbeit/2019_07_05_crop_3'
+    Path_Model = os.path.join('C:/Users/Adrian/Desktop', 'model512_depth4_epoch15.h5')
 
     # load pretrained model
     model = load_model(Path_Model)
@@ -215,8 +233,8 @@ if __name__ == '__main__':
     # specify segmentation parameters
     Parameters = {'first_frame':None,\
                   'last_frame':None,\
-                  'increment':None,\
-                  'size':(256, 256)
+                  'increment':6,\
+                  'size':(512, 512)
                     }
         
     # instantiate segmentation object
